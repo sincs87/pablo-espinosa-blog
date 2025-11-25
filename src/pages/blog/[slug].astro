@@ -1,0 +1,41 @@
+---
+// [slug].astro - Página dinámica para posts individuales
+import BlogPost from '@layouts/BlogPost.astro';
+import { getPosts, getPostBySlug } from '@lib/supabase';
+import { calculateReadingTime } from '@utils/readingTime';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+
+if (!post) {
+  return Astro.redirect('/404');
+}
+
+const readingTime = calculateReadingTime(post.content);
+---
+
+<BlogPost
+  title={post.title}
+  description={post.excerpt}
+  publishedAt={new Date(post.published_at)}
+  updatedAt={post.updated_at ? new Date(post.updated_at) : undefined}
+  tags={post.tags}
+  image={post.image_url}
+  content={post.content}
+>
+  <div class="markdown-content" set:html={post.content} />
+</BlogPost>
+
+<style>
+  .markdown-content {
+    /* Estilos adicionales para el contenido markdown si es necesario */
+  }
+</style>

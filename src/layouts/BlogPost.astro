@@ -1,0 +1,227 @@
+---
+// BlogPost.astro - Layout para posts del blog
+import BaseLayout from './BaseLayout.astro';
+import ReadingProgress from '@components/ReadingProgress.astro';
+import { calculateReadingTime } from '@utils/readingTime';
+
+interface Props {
+  title: string;
+  description: string;
+  publishedAt: Date;
+  updatedAt?: Date;
+  tags?: string[];
+  image?: string;
+  content?: string;
+}
+
+const {
+  title,
+  description,
+  publishedAt,
+  updatedAt,
+  tags = [],
+  image,
+  content = '',
+} = Astro.props;
+
+const readingTime = calculateReadingTime(content);
+const formattedDate = publishedAt.toLocaleDateString('es-ES', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  type="article"
+  publishedTime={publishedAt.toISOString()}
+  modifiedTime={updatedAt?.toISOString()}
+  image={image}
+>
+  <ReadingProgress />
+  
+  <article class="blog-post">
+    <div class="container">
+      <div class="post-header">
+        <div class="post-meta">
+          <time datetime={publishedAt.toISOString()}>{formattedDate}</time>
+          <span class="separator">•</span>
+          <span class="reading-time">{readingTime.text}</span>
+        </div>
+        
+        <h1 class="post-title">{title}</h1>
+        <p class="post-description">{description}</p>
+        
+        {tags.length > 0 && (
+          <div class="post-tags">
+            {tags.map(tag => (
+              <span class="tag">{tag}</span>
+            ))}
+          </div>
+        )}
+      </div>
+      
+      <div class="post-content content-width">
+        <slot />
+      </div>
+      
+      <div class="post-footer content-width">
+        <div class="author-card">
+          <div class="author-info">
+            <h3>Pablo Espinosa</h3>
+            <p>SEO Técnico & Programador especializado en automatizaciones y optimización web.</p>
+          </div>
+          <a href="/sobre-mi" class="btn btn-secondary">Más sobre mí</a>
+        </div>
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .blog-post {
+    padding: var(--space-12) 0;
+  }
+
+  .post-header {
+    max-width: var(--max-width-content);
+    margin: 0 auto var(--space-12);
+    text-align: center;
+  }
+
+  .post-meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-tertiary);
+  }
+
+  .separator {
+    color: var(--color-border);
+  }
+
+  .reading-time {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .post-title {
+    font-size: var(--font-size-5xl);
+    margin-bottom: var(--space-4);
+    line-height: 1.1;
+  }
+
+  .post-description {
+    font-size: var(--font-size-xl);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-6);
+  }
+
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    justify-content: center;
+  }
+
+  .tag {
+    padding: var(--space-2) var(--space-4);
+    background-color: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    transition: all var(--transition-fast);
+  }
+
+  .tag:hover {
+    border-color: var(--color-accent-primary);
+    color: var(--color-accent-primary);
+  }
+
+  .post-content {
+    font-size: var(--font-size-lg);
+    line-height: var(--line-height-relaxed);
+  }
+
+  .post-content :global(h2) {
+    margin-top: var(--space-12);
+    margin-bottom: var(--space-6);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .post-content :global(h3) {
+    margin-top: var(--space-10);
+    margin-bottom: var(--space-4);
+  }
+
+  .post-content :global(p) {
+    margin-bottom: var(--space-6);
+  }
+
+  .post-content :global(img) {
+    border-radius: var(--radius-lg);
+    margin: var(--space-8) 0;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .post-content :global(a) {
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent-primary);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+  }
+
+  .post-footer {
+    margin-top: var(--space-16);
+    padding-top: var(--space-12);
+    border-top: 2px solid var(--color-border);
+  }
+
+  .author-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-8);
+    padding: var(--space-8);
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+  }
+
+  .author-info h3 {
+    margin-bottom: var(--space-2);
+    color: var(--color-text-primary);
+  }
+
+  .author-info p {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+
+  @media (max-width: 768px) {
+    .post-title {
+      font-size: var(--font-size-3xl);
+    }
+
+    .post-description {
+      font-size: var(--font-size-lg);
+    }
+
+    .post-content {
+      font-size: var(--font-size-base);
+    }
+
+    .author-card {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+</style>

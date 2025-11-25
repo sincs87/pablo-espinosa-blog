@@ -1,0 +1,45 @@
+---
+// ReadingProgress.astro - Barra de progreso de lectura
+---
+
+<div id="reading-progress" class="reading-progress"></div>
+
+<style>
+  .reading-progress {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    height: var(--reading-progress-height);
+    background: var(--color-accent-gradient);
+    width: 0%;
+    z-index: var(--z-fixed);
+    transition: width 150ms ease-out;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  }
+</style>
+
+<script>
+  function updateReadingProgress() {
+    const progressBar = document.getElementById('reading-progress');
+    if (!progressBar) return;
+
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight - windowHeight;
+    const scrollTop = window.scrollY;
+    
+    const progress = (scrollTop / documentHeight) * 100;
+    progressBar.style.width = `${Math.min(progress, 100)}%`;
+  }
+
+  // Actualizar al hacer scroll
+  window.addEventListener('scroll', updateReadingProgress, { passive: true });
+  
+  // Actualizar al cargar
+  updateReadingProgress();
+
+  // Reinicializar después de navegación
+  document.addEventListener('astro:after-swap', () => {
+    updateReadingProgress();
+    window.addEventListener('scroll', updateReadingProgress, { passive: true });
+  });
+</script>
